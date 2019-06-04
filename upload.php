@@ -90,7 +90,7 @@ $result = mysqli_query($link, $sql);
 if (mysqli_num_rows($result) > 0) {
     // output data of each row
     while($row = mysqli_fetch_assoc($result)) {
-        echo '<option value="' . $row["catName"] . '">' . $row["catName"] . '</option>';
+        echo '<option value="' . $row["catId"] . '">' . $row["catName"] . '</option>';
     }
 } else {
     echo "0 results";
@@ -133,12 +133,28 @@ if (mysqli_num_rows($result) > 0) {
   </body>
 
 <?php
+$pCategoryId = $_POST["category"];
+if (isset($_POST["title"])) {
 //GATHER DATA FROM THE FORM & NAMING VARIABLES
+require_once 'admin/config.php';
+
+$sql = "SELECT * FROM `cat` WHERE `catId` = '$pCategoryId' LIMIT 1";
+echo $sql;
+$result = mysqli_query($link, $sql);
+
+if (mysqli_num_rows($result) > 0) {
+    // output data of each row
+    while($row = mysqli_fetch_assoc($result)) {
+        $pCategoryName = $row["catName"];
+    }
+} else {
+    echo "0 results";
+}
+
 $h1 = '<strong><i><h1 class="display-3">'. $_POST["title"] . '</h1></i></strong>';
 $pTitle = $_POST["title"];
 $pSubtitle = $_POST["subtitle"];
 $pKeywords = $_POST["keywords"];
-$pCategory = $_POST["category"];
 $filenam = urlencode($_POST["title"]);
 $filename = "$filenam.php";
 $pUrl = "p/$filename";
@@ -196,7 +212,7 @@ $htmlpage = '
   <body> ' . "
 <?php require_once('../header.php'); ?> " . '
 
-<main class="container lead my-3"><div class="jumbotron">' . $h1 . $h2 . '<p><i>Date:' . $date . '</i><strong> Category: <a href="../category.php?category=' . $pCategory . '">' . $pCategory . '</a></strong></p><img class="img-fluid"  style="width: 100%; display: block;"  src="img/' . $imagename . '"></img></div>' . $p . '</main> ' . "
+<main class="container lead my-3"><div class="jumbotron">' . $h1 . $h2 . '<p><i>Date:' . $date . '</i><strong> Category: <a href="../category.php?category=' . $pCategoryId . '">' . $pCategoryName . '</a></strong></p><img class="img-fluid"  style="width: 100%; display: block;"  src="img/' . $imagename . '"></img></div>' . $p . '</main> ' . "
 <?php require_once('../similar.php'); ?>
 <?php require_once('../footer.php'); ?> " . '
   <script src="../assets/jquery.js"></script>
@@ -209,9 +225,9 @@ $htmlpage = '
 ';
 
 //SEND VALUES TO DB
-if (isset($_POST["title"])) {
 
-$myfile = fopen("p/$filename", "w") or die("Permission Error, on p folder");
+
+$myfile = fopen("p/$filename", "w") or die('<script> alert("The fastpress/p folder does not have permissions to be writable by your web server. Read the install instructions");</script>');
 $txt = $htmlpage;
 fwrite($myfile, $txt);
 fclose($myfile);
